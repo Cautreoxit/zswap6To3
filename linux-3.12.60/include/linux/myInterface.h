@@ -25,9 +25,6 @@
 #include <linux/mutex.h>
 #include <linux/kernel.h>
 
-/*********************************
-* compression functions
-**********************************/
 enum comp_op {
 	ZSWAP_COMPOP_COMPRESS,
 	ZSWAP_COMPOP_DECOMPRESS
@@ -38,33 +35,15 @@ int zswap_comp_op(enum comp_op op, unsigned int *src, unsigned int slen, unsigne
 int zswap_comp_init(void);
 
 
-/*********************************
-* tunables
-**********************************/
 
 #define CONFIG_ZSWAP_COMPRESSOR_DEFAULT "lzo"
 #define CONFIG_ZSWAP_ZPOOL_DEFAULT "zbud"
 
-/*********************************
-* data structures
-**********************************/
 struct crypto_acomp {
-	// int (*compress)(struct acomp_req *req);
-	// int (*decompress)(struct acomp_req *req);
-	// void (*dst_free)(struct scatterlist *dst);
-	// unsigned int reqsize;
-	// struct crypto_tfm base;
 	int nul;
 };
 
 struct acomp_req {
-	// struct crypto_async_request base;
-	// struct scatterlist *src;
-	// struct scatterlist *dst;
-	// unsigned int slen;
-	// unsigned int dlen;
-	// u32 flags;
-	// void *__ctx[] CRYPTO_MINALIGN_ATTR;
 	unsigned long *src;
 	unsigned long *dst;
 	unsigned int slen;
@@ -72,32 +51,23 @@ struct acomp_req {
 };
 
 struct crypto_wait {
-	struct completion completion;   // v2就在该头文件，v1有实现completion
+	struct completion completion;   
 	int err;
 };
 
 struct obj_cgroup {
-    int nul;          // 表示空
+    int nul;          
 };
 
 
-/*********************************
-* helpers and fwd declarations
-**********************************/
-// unsigned long totalram_pages(void);
 #define totalram_pages() (totalram_pages)
 
 
-/*********************************
-* zswap entry functions
-**********************************/
 void obj_cgroup_uncharge_zswap(struct obj_cgroup *objcg, size_t size);
 
 void obj_cgroup_put(struct obj_cgroup *objcg);
 
-/*********************************
-* per-cpu code
-**********************************/
+
 
 struct crypto_acomp *crypto_alloc_acomp_node(const char *alg_name, u32 type, u32 mask, int node);
 
@@ -113,9 +83,7 @@ void crypto_req_done(void *data, int err);
 
 void acomp_request_free(struct acomp_req *req);
 
-/*********************************
-* pool functions
-**********************************/
+
 
 void strscpy(char *dest, const char *src, size_t count);
 
@@ -129,15 +97,10 @@ int cpuhp_state_remove_instance(enum cpuhp_state state, struct hlist_node *node)
 
 #define __GFP_KSWAPD_RECLAIM 0
 
-/*********************************
-* param callbacks
-**********************************/
+
 
 #define fallthrough do { } while (0)
 
-/*********************************
-* writeback code
-**********************************/
 #define raw_cpu_ptr(ptr)	per_cpu_ptr(ptr, 0)
 
 void *memset_l(unsigned long *p, unsigned long v, __kernel_size_t n);
@@ -148,13 +111,7 @@ void *memset64(uint64_t *s, uint64_t v, size_t count);
 
 static inline int crypto_has_acomp(const char *alg_name, u32 type, u32 mask)
 {
-	// type &= ~CRYPTO_ALG_TYPE_MASK;
-	// type |= CRYPTO_ALG_TYPE_ACOMPRESS;
-	// mask |= CRYPTO_ALG_TYPE_ACOMPRESS_MASK;
-
-	// return crypto_has_alg(alg_name, type, mask);
-	return 1; // 返回1代表存在，返回0代表不存在
-    // !暂时一定返回1，最后需要确定他能用哪些alg_name，判断是能用的alg_name则返回1否则返回0
+	return 1; 
 }
 
 void acomp_request_set_params(struct acomp_req *req,
@@ -186,9 +143,6 @@ struct page *page_folio(struct page* p);
 #define __swap_writepage2(arg1, arg2) __swap_writepage(arg1, arg2, end_swap_bio_write)
 #define __swap_writepage3(arg1, arg2, arg3) __swap_writepage(arg1, arg2, arg3)
 
-/*********************************
-* frontswap hooks
-**********************************/
 struct obj_cgroup *get_obj_cgroup_from_page(struct page *page);
 
 bool obj_cgroup_may_zswap(struct obj_cgroup *objcg);
@@ -201,13 +155,7 @@ void count_objcg_event(struct obj_cgroup *objcg, enum vm_event_item idx);
 #define ZSWPOUT 1001
 
 
-/*********************************
-* module init and exit
-**********************************/
 
-// enum cpuhp_state {
-// 	CPUHP_MM_ZSWP_POOL_PREPARE
-// }
 #define CPUHP_MM_ZSWP_POOL_PREPARE 0
 #define CPUHP_MM_ZSWP_MEM_PREPARE 0
 
@@ -226,16 +174,10 @@ int cpuhp_setup_state_multi(enum cpuhp_state state,
 
 void cpuhp_remove_state(enum cpuhp_state state);
 
-// zbud.c中用到
 #define list_last_entry(ptr, type, member) \
 	list_entry((ptr)->prev, type, member)
 
 
-
-
-/*********************************
-* zpool.h
-**********************************/
 struct zpool;
 
 struct zpool_ops {
